@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Application HQ</title>
+    <meta
+      name="description"
+      content="A private, offline-friendly tracker for fellowships, scholarships, funded events and grants."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b6b4c'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <style>
+      /* @inline styles.css */
+    </style>
+  </head>
+  <body>
+    <header class="mast">
+      <div class="wrap">
+        <div class="brand">
+          <h1>Application <span>HQ</span></h1>
+          <div class="who">
+            Track fellowships, funded events, scholarships, master's programmes and grants, for you
+            and your organisation
+          </div>
+        </div>
+        <div class="mast-actions">
+          <span
+            class="scout-pill"
+            id="savePill"
+            title="Everything is stored in this browser on this device"
+            ><span class="dot live" id="saveDot"></span
+            ><span id="saveText">Saved in this browser</span></span
+          >
+          <button
+            class="btn"
+            id="importBtn"
+            type="button"
+            title="Import a backup or a JSON file of opportunities"
+          >
+            Import
+          </button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden />
+          <button
+            class="btn"
+            id="backupBtn"
+            type="button"
+            title="Download all your data as a JSON file"
+          >
+            Back up
+          </button>
+          <button class="btn" id="exportXlsx" type="button">Export to Excel</button>
+          <button class="btn primary" id="addBtn" type="button">+ Add opportunity</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div id="offline" class="offline" hidden>
+        This browser is blocking local storage (for example in a private window), so nothing you
+        change here will be kept. Open the page in a normal window, or use Back up often.
+      </div>
+
+      <div class="welcome" id="welcome" hidden>
+        <div>
+          <b>Welcome to Application HQ.</b> Take 5 minutes to set it up: tell it about you, what
+          you're looking for, who you apply for, and when you want your scout and reminders.
+        </div>
+        <button class="btn primary" id="startSetup" type="button">Set up my tracker</button>
+      </div>
+
+      <section class="rail" aria-labelledby="railHead">
+        <div class="rail-head">
+          <h2 id="railHead">Needs your attention</h2>
+          <span class="eyebrow mono" id="todayLbl"></span>
+        </div>
+        <div class="alerts" id="alerts"></div>
+        <div class="strip" id="strip"></div>
+      </section>
+
+      <nav class="tabs" role="tablist" aria-label="Views">
+        <button class="tab" role="tab" id="tab-tracker" aria-selected="true" data-view="tracker">
+          Tracker
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          id="tab-deadlines"
+          aria-selected="false"
+          data-view="deadlines"
+        >
+          Deadlines
+        </button>
+        <button class="tab" role="tab" id="tab-feed" aria-selected="false" data-view="feed">
+          Updates<span class="badge" id="feedBadge" hidden>0</span>
+        </button>
+        <button class="tab" role="tab" id="tab-profile" aria-selected="false" data-view="profile">
+          Setup &amp; scout
+        </button>
+      </nav>
+
+      <section class="view" id="view-tracker">
+        <div class="filters">
+          <div id="forChips" class="fgroup" role="group" aria-label="Who it's for"></div>
+          <div id="catChips" style="display: flex; gap: 6px; flex-wrap: wrap"></div>
+          <select class="sel" id="stFilter" aria-label="Filter by status"></select>
+          <input
+            class="search"
+            id="q"
+            type="search"
+            placeholder="Search name, organiser, notes"
+            aria-label="Search"
+          />
+        </div>
+        <div class="tablebox">
+          <table>
+            <thead>
+              <tr>
+                <th>Opportunity</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Deadline</th>
+                <th>Funding</th>
+                <th>Fit</th>
+                <th>Documents</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="empty" id="rowsEmpty" hidden>
+            <h3>No applications yet</h3>
+            <p>
+              Add your first opportunity, import a file, or load some example entries to see how it
+              works.
+            </p>
+            <button class="btn" id="loadSample" type="button">Load example entries</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-deadlines" hidden>
+        <div class="months" id="months"></div>
+      </section>
+
+      <section class="view" id="view-feed" hidden>
+        <div class="rail-head" style="margin-bottom: 12px">
+          <p class="note" style="margin: 0; max-width: 66ch">
+            Updates are short notes about new openings, deadlines and changes. You can import them
+            as JSON, for example from an AI assistant you ask to search for opportunities on a
+            schedule. See the README for the format.
+          </p>
+          <button class="btn sm" id="markAll" type="button">Mark all read</button>
+        </div>
+        <div class="feed" id="feed"></div>
+      </section>
+
+      <section class="view setup" id="view-profile" hidden>
+        <div class="card">
+          <h3>How to get the most out of Application HQ</h3>
+          <ol class="steps">
+            <li><b>About you:</b> the facts the scout and your essays draw on.</li>
+            <li><b>What to look for:</b> the types of opportunity and topics you care about.</li>
+            <li>
+              <b>Who you apply for:</b> yourself, plus any organisations, teams or projects you
+              lead.
+            </li>
+            <li>
+              <b>Your scout & reminders:</b> choose when to search (fixed weekdays or your own shift
+              dates), copy your personal scout prompt into an AI assistant, and add your deadlines
+              to your calendar for reminders.
+            </li>
+          </ol>
+        </div>
+        <div class="cols">
+          <div class="card">
+            <h3>1. About you</h3>
+            <div class="grid2">
+              <div class="fld">
+                <label for="p-name">Name</label><input id="p-name" data-p="name" />
+              </div>
+              <div class="fld">
+                <label for="p-based">Based in (city, country)</label
+                ><input id="p-based" data-p="based" placeholder="e.g. Accra, Ghana" />
+              </div>
+              <div class="fld">
+                <label for="p-nationality">Nationality</label
+                ><input id="p-nationality" data-p="nationality" />
+              </div>
+              <div class="fld">
+                <label for="p-age">Age range (many programmes have limits)</label
+                ><select id="p-age" data-p="age">
+                  <option value="">Prefer not to say</option>
+                  <option>18–24</option>
+                  <option>25–29</option>
+                  <option>30–35</option>
+                  <option>36–45</option>
+                  <option>46+</option>
+                </select>
+              </div>
+              <div class="fld full">
+                <label for="p-role">Current role and field</label
+                ><input
+                  id="p-role"
+                  data-p="role"
+                  placeholder="e.g. Cybersecurity engineer; community educator"
+                />
+              </div>
+              <div class="fld full">
+                <label for="p-edu">Education (degree, class or GPA)</label
+                ><input
+                  id="p-edu"
+                  data-p="education"
+                  placeholder="e.g. BSc IT, Second Class Lower (2.5/4.0)"
+                />
+              </div>
+              <div class="fld full">
+                <label for="p-goals">Goals</label
+                ><textarea
+                  id="p-goals"
+                  data-p="goals"
+                  placeholder="e.g. A fully funded master's in cybersecurity in Japan; Internet governance fellowships"
+                ></textarea>
+              </div>
+            </div>
+            <div class="fld">
+              <label for="profileText"
+                >Your story, in your own words: work, what you've built (with real numbers),
+                recognition</label
+              ><textarea
+                id="profileText"
+                style="min-height: 220px"
+                placeholder="Essays and the scout use only these facts, so be specific and honest."
+              ></textarea
+              ><span class="status-line" id="profileSaved"></span>
+            </div>
+            <div class="fld">
+              <label for="voiceText">Writing voice</label
+              ><textarea
+                id="voiceText"
+                style="min-height: 70px"
+                placeholder="e.g. warm, direct, first person, British spelling, no clichés"
+              ></textarea>
+            </div>
+          </div>
+          <div style="display: grid; gap: 18px">
+            <div class="card">
+              <h3>2. What to look for</h3>
+              <div class="fld">
+                <label>Types of opportunity</label>
+                <div class="checks" id="typeChecks"></div>
+              </div>
+              <div class="fld">
+                <label for="p-topics">Topics and fields (comma-separated)</label
+                ><input
+                  id="p-topics"
+                  data-p="topics"
+                  placeholder="e.g. cybersecurity, Internet governance, digital rights, women in tech"
+                />
+              </div>
+              <div class="fld">
+                <label for="p-regions">Where (countries or regions you'd travel or study in)</label
+                ><input
+                  id="p-regions"
+                  data-p="regions"
+                  placeholder="e.g. anywhere; Japan; online"
+                />
+              </div>
+              <div class="checks">
+                <label
+                  ><input type="checkbox" id="p-funded" data-pc="fundedOnly" /> Fully funded
+                  only</label
+                ><label
+                  ><input type="checkbox" id="p-nofee" data-pc="noFees" /> Skip anything with an
+                  application fee</label
+                >
+              </div>
+            </div>
+            <div class="card">
+              <h3>3. Who you apply for</h3>
+              <p class="note" style="margin: 0">
+                "Me" is you as an individual. Add each organisation, team or project you lead, so
+                the scout looks for funding for it too.
+              </p>
+              <div class="applist" id="applist"></div>
+              <div class="grid2">
+                <div class="fld">
+                  <label for="newApplicant">Organisation name</label
+                  ><input id="newApplicant" placeholder="e.g. My Organisation" />
+                </div>
+                <div class="fld">
+                  <label for="newOrgReg">Legal registration</label
+                  ><select id="newOrgReg">
+                    <option>Registered</option>
+                    <option>Registration in progress</option>
+                    <option>Not registered</option>
+                  </select>
+                </div>
+                <div class="fld full">
+                  <label for="newOrgAbout">What it does (one or two lines)</label
+                  ><input
+                    id="newOrgAbout"
+                    placeholder="e.g. Women-led community digital-safety education, Ghana"
+                  />
+                </div>
+              </div>
+              <div>
+                <button class="btn sm" id="addApplicant" type="button">Add organisation</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Your data</h3>
+              <p class="note" style="margin: 0">
+                Everything stays in this browser on this device. Nothing is sent anywhere. Use
+                <b>Back up</b> regularly, and <b>Import</b> to restore a backup or move to another
+                device.
+              </p>
+              <div class="btnrow">
+                <button class="btn sm danger" id="wipeBtn" type="button">Erase all data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>4. Your scout & reminders</h3>
+          <p class="note" style="margin: 0">
+            Application HQ doesn't search the web itself. Your <b>scout</b> is an AI assistant you
+            give the prompt below, ideally one that can browse the web and run scheduled tasks (for
+            example Claude or ChatGPT). It finds opportunities, researches requirements and essay
+            questions, and replies with a file you <b>Import</b> here. <b>Reminders</b> come from
+            your own calendar: add your deadlines below and your phone alerts you 7, 3 and 1 days
+            before.
+          </p>
+          <div class="fld">
+            <label>When should your scout run?</label>
+            <div class="checks">
+              <label
+                ><input type="radio" name="smode" value="weekly" data-s="mode" /> The same days
+                every week</label
+              ><label
+                ><input type="radio" name="smode" value="dates" data-s="mode" /> My own dates (shift
+                workers, changing schedules)</label
+              >
+            </div>
+          </div>
+          <div id="sWeekly" class="grid2">
+            <div class="fld full">
+              <label>Scout days</label>
+              <div class="checks" id="dayChecks"></div>
+            </div>
+            <div class="fld">
+              <label for="s-time">Time</label><input type="time" id="s-time" data-s="time" />
+            </div>
+            <div class="fld">
+              <label for="s-tz">Time zone</label><input id="s-tz" data-s="tz" />
+            </div>
+          </div>
+          <div id="sDates" class="grid2" hidden>
+            <div class="fld full">
+              <label for="s-full"
+                >Full scout (search + prep): dates and times, one per line or comma-separated</label
+              ><textarea
+                id="s-full"
+                data-s="fullDates"
+                placeholder="e.g. 1 Dec 08:30, 2 Dec 08:30, 5 Dec 20:30"
+              ></textarea>
+            </div>
+            <div class="fld full">
+              <label for="s-rem">Reminder-only days (no searching, just what's due)</label
+              ><textarea
+                id="s-rem"
+                data-s="reminderDates"
+                placeholder="e.g. 3 Dec, 4 Dec, 7 Dec 08:30"
+              ></textarea>
+            </div>
+            <div class="fld">
+              <label for="s-tz2">Time zone</label><input id="s-tz2" data-s="tz" />
+            </div>
+            <div class="shiftbox full" id="shiftBox">
+              <h4>Your shift calendar</h4>
+              <p class="note" style="margin: 0">
+                Add your rota and Application HQ works out your scout and reminder dates. Use a
+                photo or screenshot read by your AI assistant, or tap the days yourself. Check the
+                calendar, fix anything wrong, then click <b>Use these dates</b>.
+              </p>
+              <div class="grid2">
+                <div class="fld">
+                  <label for="sh-month">Month</label><input type="month" id="sh-month" />
+                </div>
+                <div class="fld">
+                  <label for="sh-file"
+                    >Photo or screenshot of your rota (stays on your device)</label
+                  ><input type="file" id="sh-file" accept="image/*" />
+                </div>
+              </div>
+              <img id="sh-preview" class="rotaimg" alt="Your rota" hidden />
+              <ol class="steps">
+                <li>
+                  Click <b>Copy rota prompt</b>, open your AI assistant, paste it and attach the
+                  same photo.
+                </li>
+                <li>Paste its reply below and click <b>Read reply</b>. The calendar fills in.</li>
+              </ol>
+              <div class="btnrow">
+                <button class="btn sm" id="sh-copy" type="button">Copy rota prompt</button>
+              </div>
+              <div class="fld">
+                <label for="sh-reply">AI reply (lines like "2026-12-01 Day")</label
+                ><textarea
+                  id="sh-reply"
+                  placeholder="2026-12-01 Day&#10;2026-12-02 Night&#10;2026-12-03 Off"
+                ></textarea>
+              </div>
+              <div class="btnrow">
+                <button class="btn sm" id="sh-read" type="button">Read reply</button
+                ><button class="btn sm ghost" id="sh-clear" type="button">Clear month</button>
+              </div>
+              <div class="legend">
+                <span>Tap a day to change it:</span><span>☀ Day</span><span>☾ Night</span
+                ><span>⌂ Off</span><span>· not set</span>
+              </div>
+              <div class="cal" id="sh-cal"></div>
+              <div class="grid2">
+                <div class="fld">
+                  <label for="sh-dayt">On day shifts, scout at</label
+                  ><input type="time" id="sh-dayt" />
+                </div>
+                <div class="fld">
+                  <label for="sh-nightt">On night shifts, scout at</label
+                  ><input type="time" id="sh-nightt" />
+                </div>
+                <div class="fld">
+                  <label for="sh-offt">On off days, reminder at</label
+                  ><input type="time" id="sh-offt" />
+                </div>
+                <div class="fld">
+                  <label for="sh-offmode">On off days</label
+                  ><select id="sh-offmode">
+                    <option value="reminder">Send reminders only</option>
+                    <option value="scout">Run a full scout too</option>
+                    <option value="none">Do nothing</option>
+                  </select>
+                </div>
+              </div>
+              <div class="btnrow">
+                <button class="btn primary sm" id="sh-apply" type="button">Use these dates</button
+                ><span class="status-line" id="sh-summary"></span>
+              </div>
+            </div>
+            <div class="fld">
+              <label for="s-repeat">I get a new schedule</label
+              ><select id="s-repeat" data-s="repeat">
+                <option value="every month">Every month</option>
+                <option value="every week">Every week</option>
+              </select>
+            </div>
+          </div>
+          <div class="fld">
+            <label for="scoutPrompt">Your personal scout prompt (built from everything above)</label
+            ><textarea id="scoutPrompt" class="promptbox" readonly></textarea>
+          </div>
+          <div class="btnrow">
+            <button class="btn primary" id="copyPrompt" type="button">Copy scout prompt</button>
+            <button class="btn" id="dlPrompt" type="button">Download prompt (.txt)</button>
+            <button class="btn" id="icsBtn" type="button">
+              Add deadlines to my calendar (.ics)
+            </button>
+          </div>
+          <ol class="steps">
+            <li>
+              Paste the prompt into your AI assistant and ask it to run on your schedule (in Claude:
+              ask it to "set this up as a scheduled task"; in ChatGPT: use Tasks). Attach your
+              latest <b>Back up</b> file so it skips what you already track.
+            </li>
+            <li>
+              When it replies with a JSON file, save it and click <b>Import</b>. Your statuses,
+              essays and ticked documents are always kept.
+            </li>
+            <li>
+              After importing, click <b>Add deadlines to my calendar</b> again so your reminders
+              include the new deadlines.
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <div class="scrim" id="scrim" hidden></div>
+    <aside class="drawer" id="drawer" hidden aria-label="Application details"></aside>
+    <div class="toast" id="toast" hidden></div>
+    <script>
+      /* @inline ../vendor/jszip.min.js */
+    </script>
+    <script>
+      /* @inline app.js */
+    </script>
+  </body>
+</html>

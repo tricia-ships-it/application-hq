@@ -1,0 +1,48 @@
+APPLICATION HQ: START HERE
+==========================
+
+A private tracker for fellowships, scholarships, funded events and grants.
+It runs in your web browser. No account, and your data stays on your computer.
+
+1. OPEN IT
+   Unzip this folder, then double-click "index.html".
+   It opens in Chrome, Edge, Firefox or Safari.
+   To make it feel like an app, in Chrome: menu (three dots) > Cast, save and share >
+   Create shortcut > tick "Open as window". In Edge: menu > Apps > Install this site as an app.
+
+2. SET IT UP (about 5 minutes)
+   Click "Set up my tracker" and fill in the Setup & scout tab:
+   - About you: the facts your essays and scout will use
+   - What to look for: types of opportunity, topics, regions
+   - Who you apply for: yourself, plus any organisations you lead
+   - Your scout & reminders: when it should run (fixed weekdays, or your own
+     dates; shift workers can use a photo of their rota)
+
+3. TURN ON YOUR SCOUT
+   Click "Copy scout prompt" and paste it into an AI assistant that can browse
+   the web (for example Claude or ChatGPT). Ask it to set it up as a scheduled task.
+   Attach your "Back up" file so it knows what you already track.
+   Each run, it gives you a file. Click "Import" in Application HQ to add it.
+   Your statuses and essays are never overwritten.
+
+4. TURN ON REMINDERS
+   Click "Add deadlines to my calendar (.ics)" and open the file. Your phone
+   alerts you 7, 3 and 1 days before each deadline, and on the day.
+   Do it again after each import.
+
+5. APPLY
+   Open any opportunity to see how to apply, the requirements, a documents
+   checklist and the essay questions with outlines or sample drafts.
+   Edit them into your own words, mark them Final, then copy or download
+   them into the real application form.
+
+6. KEEP IT SAFE
+   Click "Back up" regularly. Clearing your browser data erases the tracker.
+   Your backup file contains your personal story and plans, so keep it private.
+   On a shared computer, use your own browser profile.
+   Never pay to apply for a "fully funded" programme, and never give an AI
+   assistant your passwords, ID numbers or bank details.
+   More in SECURITY.md.
+
+The full guide is in README.md (it opens in any text editor, or nicely on GitHub).
+Made by Patricia Serwaa Kodie Agyekum, founder of Obaa Cyber Corps. MIT licence.

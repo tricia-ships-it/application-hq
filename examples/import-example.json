@@ -1,0 +1,51 @@
+{
+  "apps": [
+    {
+      "id": "example-leadership-fellowship-2027",
+      "name": "Example Leadership Fellowship 2027",
+      "org": "Example Foundation",
+      "applicant": "Me",
+      "category": "Fellowship",
+      "status": "Not started",
+      "deadline": "2027-01-15",
+      "deadlineNote": "Online form closes 23:59 UTC",
+      "opens": "2026-11-01",
+      "eventDates": "June–August 2027",
+      "location": "Virtual + one week in person",
+      "funding": "Travel, accommodation and programme costs covered",
+      "fee": "None",
+      "eligibility": "Ages 18–35; leading a community project",
+      "link": "https://example.org/fellowship",
+      "fit": "High",
+      "notes": "Strong fit for my community education work.",
+      "warning": "AI-written essays are discouraged.",
+      "documents": ["CV", "Passport (valid 6+ months)", "Two references"],
+      "source": "scout"
+    },
+    {
+      "id": "example-community-microgrant",
+      "name": "Example Community Microgrant",
+      "org": "Example Fund",
+      "applicant": "My Organisation",
+      "category": "Org grant / CSR",
+      "status": "Watching",
+      "opens": "Next call expected in March",
+      "funding": "Up to USD 1,000 for community projects",
+      "eligibility": "Open to unregistered community groups",
+      "link": "https://example.org/microgrant",
+      "fit": "Medium"
+    }
+  ],
+  "feed": [
+    {
+      "id": "f-20261118-example-leadership-fellowship",
+      "type": "new",
+      "title": "New: Example Leadership Fellowship 2027, closes 15 Jan",
+      "body": "Fully funded, ages 18–35. Verified on the official page.",
+      "appId": "example-leadership-fellowship-2027",
+      "link": "https://example.org/fellowship",
+      "source": "scout",
+      "at": "2026-11-18T09:00:00Z"
+    }
+  ]
+}
