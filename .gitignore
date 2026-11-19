@@ -1,0 +1,7 @@
+node_modules/
+test-results/
+*.log
+.DS_Store
+# Personal data: never commit your own backups
+application-hq-backup-*.json
+application-hq-import-*.json
