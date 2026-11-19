@@ -20,7 +20,16 @@ export default [
     },
   },
   {
-    files: ["scripts/**/*.mjs", "tests/**/*.mjs", "eslint.config.mjs"],
+    files: ["scripts/**/*.mjs", "eslint.config.mjs"],
     languageOptions: { ecmaVersion: 2022, sourceType: "module", globals: { ...globals.node } },
+  },
+  {
+    // Tests run in Node but also pass callbacks to page.evaluate(), which run in the browser.
+    files: ["tests/**/*.mjs"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: { ...globals.node, ...globals.browser },
+    },
   },
 ];
